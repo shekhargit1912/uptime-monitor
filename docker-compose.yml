@@ -1,15 +1,21 @@
+name: uptime-monitor
+
 services:
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: uptime-backend:local
     environment:
-      # SQLite file lives on the named volume below so data survives restarts.
       DATABASE_URL: sqlite:////data/uptime.db
       CHECK_INTERVAL: ${CHECK_INTERVAL:-60}
     volumes:
-      - sqlitedata:/data
+      - sqlitedata:/data:rw
+    ports: [] # Kept isolated from host; frontend routes traffic
+    networks:
+      - app-tier
     healthcheck:
-      # slim image has no curl, so probe /health with Python.
-      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status==200 else 1)\""]
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').getcode()==200 else 1)"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -17,15 +23,19 @@ services:
     restart: unless-stopped
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: uptime-frontend:local
     ports:
-      # host 8080 -> container 8080 (nginx-unprivileged listens on 8080).
-      - "8080:8080"
+      - "${HOST_PORT:-8080}:8080"
+    networks:
+      - app-tier
     depends_on:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/ >/dev/null 2>&1 || exit 1"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/"]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -33,3 +43,8 @@ services:
 
 volumes:
   sqlitedata:
+    name: uptime_sqlite_data
+
+networks:
+  app-tier:
+    driver: bridge
