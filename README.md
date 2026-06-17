@@ -45,6 +45,29 @@ uptime-monitor/
 
 ---
 
+## 🗄️ Why SQLite (and when you'd reach for PostgreSQL)
+
+**This MVP uses SQLite on purpose.** At the target scale — a few dozen URLs checked
+about once a minute — SQLite satisfies every requirement (durable storage of each
+check's status code, response time, and timestamp) with the least possible
+complexity: no separate database container, no credentials, zero config. The file
+lives on a Docker volume, so data survives restarts. This matches the brief's
+"keep it beautifully simple" guidance — a managed database here would be
+over-engineering.
+
+**Why not PostgreSQL up front?** Postgres earns its keep in *production* —
+concurrent writers, multiple backend replicas, high availability, large/long-lived
+history. None of those apply at MVP scale. SQLite's one real limitation is that
+it's **single-writer / single-node**.
+
+**The production-grade path:** when you outgrow single-writer (horizontal scaling
+or HA), move to **PostgreSQL** (e.g. **AWS RDS**). Because the backend reads its
+connection string from the `DATABASE_URL` environment variable and uses SQLAlchemy
+(which speaks both engines), that migration is essentially a **one-line config
+change** — point `DATABASE_URL` at Postgres — with **no application code rewrite**.
+
+---
+
 ## 🚀 1-Line Setup
 
 From the repository root:

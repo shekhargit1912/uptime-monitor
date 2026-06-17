@@ -38,11 +38,13 @@ React app calling relative `/api`, all wired together by my Compose file).
 
 ## The Prompts That Shipped It
 
-I drove the architecture myself (SQLite on a persisted volume to keep the MVP
-beautifully simple — no separate DB service to run; nginx reverse-proxy instead of
-exposing the backend port, to avoid CORS and keep a single entry point). The
-prompts below are the ones that generated the application code on top of that
-infrastructure.
+I drove the architecture myself: SQLite on a persisted volume was a deliberate,
+scale-appropriate call over Postgres — zero extra moving parts for an MVP, with
+**PostgreSQL/RDS as the documented production path** (a one-line `DATABASE_URL`
+change, no code rewrite; see the README's database section). I also chose an nginx
+reverse-proxy instead of exposing the backend port, to avoid CORS and keep a single
+entry point. The prompts below are the ones that generated the application code on
+top of that infrastructure.
 
 ### 1. Framing the build
 
