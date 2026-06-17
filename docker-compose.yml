@@ -1,0 +1,21 @@
+services:
+  backend:
+    build: ./backend
+    environment:
+      # SQLite file lives on the named volume below so data survives restarts.
+      DATABASE_URL: sqlite:////data/uptime.db
+      CHECK_INTERVAL: ${CHECK_INTERVAL:-60}
+    volumes:
+      - sqlitedata:/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  sqlitedata:
