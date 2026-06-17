@@ -20,6 +20,16 @@ services:
       timeout: 3s
       retries: 5
       start_period: 15s
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    pids_limit: 100
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
     restart: unless-stopped
 
   frontend:
@@ -39,6 +49,16 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+    security_opt:
+      - "no-new-privileges:true"
+    cap_drop:
+      - ALL
+    pids_limit: 100
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
     restart: unless-stopped
 
 volumes:
