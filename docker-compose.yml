@@ -24,12 +24,12 @@ services:
       - "no-new-privileges:true"
     cap_drop:
       - ALL
-    pids_limit: 100
     deploy:
       resources:
         limits:
           cpus: "0.50"
           memory: 256M
+          pids: 100
     restart: unless-stopped
 
   frontend:
@@ -53,12 +53,12 @@ services:
       - "no-new-privileges:true"
     cap_drop:
       - ALL
-    pids_limit: 100
     deploy:
       resources:
         limits:
           cpus: "0.25"
           memory: 128M
+          pids: 100
     restart: unless-stopped
 
 volumes:
